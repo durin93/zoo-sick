@@ -5,6 +5,9 @@ import mu.KLogging
 import org.jsoup.Jsoup
 import org.springframework.stereotype.Service
 import java.util.concurrent.CompletableFuture
+import java.util.concurrent.ExecutorService
+import java.util.concurrent.Executors
+import java.util.function.Supplier
 
 @Service
 class StockService(
@@ -13,7 +16,9 @@ class StockService(
 
     companion object : KLogging()
 
-    fun getAllCorporations(): List<CoreInfo> {
+    val executors: ExecutorService = Executors.newFixedThreadPool(1000)
+
+    fun getAllCorporationsDetail(): List<CoreInfo> {
         return getAllCorporationsCodes()?.let {
             getDetailCorpDetails(it)
         } ?: emptyList()
@@ -25,10 +30,10 @@ class StockService(
         return stockCodes ?: emptyList()
     }
 
-    fun getDetailCorpDetail(code: String): CompletableFuture<CoreInfo>? {
-        return CompletableFuture.supplyAsync {
+    fun asyncCreateCorpDetail(code: String): CompletableFuture<CoreInfo> {
+        return CompletableFuture.supplyAsync(Supplier {
             stockApiManager.getCorporationsDetails(code)
-        }.thenApply { response ->
+        }, executors).thenApply { response ->
             val parsedResponse = Jsoup.parseBodyFragment(response.toString())
             val perTable = parsedResponse.getElementsByClass("per_table") //투자정보에 위
             val sectionCopAnalysis = parsedResponse.getElementsByClass("section cop_analysis")?.let { it.first() }//기업실적분석
@@ -69,18 +74,24 @@ class StockService(
     }
 
     private fun getDetailCorpDetails(stockCodes: List<String>): List<CoreInfo> {
-        val corpDetails = mutableListOf<CoreInfo>()
-        stockCodes.forEach { it ->
-            getDetailCorpDetail(it)?.get()?.let {
-                corpDetails.add(it)
-            }
-        }
-        return corpDetails
+        return stockCodes.map {
+            asyncCreateCorpDetail(it)
+        }.allOfJoin()
     }
 
     fun searchCorpsByCondition(searchCorpCondition: SearchCorpCondition): List<CoreInfo>? {
         val stockCodes = getAllCorporationsCodes()
-        val corpDetails = stockCodes?.let { getDetailCorpDetails(it) }
-        return corpDetails
+        return stockCodes?.let { getDetailCorpDetails(it) }
     }
 }
+
+
+fun <T> List<CompletableFuture<out T>>.allOf(): CompletableFuture<List<T>> {
+    return CompletableFuture
+            .allOf(*toTypedArray())
+            .thenApply {
+                map(CompletableFuture<out T>::join)
+            }
+}
+
+fun <T> List<CompletableFuture<out T>>.allOfJoin() = allOf().join()!!

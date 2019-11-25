@@ -12,13 +12,15 @@ class StockApiController(val stockService: StockService) {
     companion object : KLogging()
 
     @GetMapping("/corps/core")
-    fun getAllCorporations(): List<CoreInfo> {
-        return stockService.getAllCorporations()
+    fun getAllCorporationsDetail(): List<CoreInfo> {
+        val coreInfo = stockService.getAllCorporationsDetail()
+        logger.info { "size ${coreInfo.size}" }
+        return coreInfo
     }
 
     @GetMapping("")
     fun getDetailByCorpCode(code: String): CoreInfo? {
-        return stockService.getDetailCorpDetail(code)?.get()
+        return stockService.asyncCreateCorpDetail(code)?.get()
     }
 
     @GetMapping("/search")

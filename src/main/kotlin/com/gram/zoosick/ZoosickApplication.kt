@@ -16,14 +16,3 @@ class ZoosickApplication
 fun main(args: Array<String>) {
     runApplication<ZoosickApplication>(*args)
 }
-
-@Bean
-fun taskExecutor(): TaskExecutor {
-
-    val taskExecutor = ThreadPoolTaskExecutor()
-    taskExecutor.corePoolSize = 10
-    taskExecutor.setQueueCapacity(50)
-    taskExecutor.maxPoolSize = 20
-
-    return taskExecutor
-}
