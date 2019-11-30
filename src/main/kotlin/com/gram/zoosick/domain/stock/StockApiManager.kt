@@ -1,9 +1,10 @@
 package com.gram.zoosick.domain.stock
 
-import com.gram.zoosick.utils.RestTemplateHelper
+import com.gram.zoosick.support.RestTemplateHelper
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Component
 import org.springframework.web.util.UriComponentsBuilder
+import java.lang.Thread.sleep
 
 @Component
 class StockApiManager(
