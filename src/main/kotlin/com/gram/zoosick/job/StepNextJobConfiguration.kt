@@ -14,7 +14,7 @@ import java.lang.IllegalArgumentException
 
 
 @Configuration
-class JobConfiguration(
+class StepNextJobConfiguration(
         val jobBuilderFactory: JobBuilderFactory,
         val stepBuilderFactory: StepBuilderFactory
 ) {
@@ -22,33 +22,39 @@ class JobConfiguration(
     companion object: KLogging()
 
     @Bean
-    fun simpleJob(): Job {
-        return jobBuilderFactory.get("simpleJob")
-                .start(simpleStep1(null))
-//                .next(simpleStep2(null))
+    fun stepNextJob(): Job {
+        return jobBuilderFactory.get("stepNextJob")
+                .start(step1())
+                .next(step2())
+                .next(step3())
                 .build()
     }
 
     @Bean
-    @JobScope
-    fun simpleStep1(@Value("#{jobParameters[requestDate]}") requestDate: String?): Step {
-        return stepBuilderFactory.get("simpleStep1")
+    fun step1(): Step {
+        return stepBuilderFactory.get("step1")
                 .tasklet { contribution, chunkContext ->
-                    logger.info(">>>>> This is Step1")
-                    logger.info(">>>>> requestDate = $requestDate")
-//                    throw IllegalArgumentException("test")
+                    logger.info(">>>>> This is step1")
                     RepeatStatus.FINISHED
                 }
                 .build()
     }
 
     @Bean
-    @JobScope
-    fun simpleStep2(@Value("#{jobParameters[requestDate]}") requestDate: String?): Step {
-        return stepBuilderFactory.get("simpleStep1")
+    fun step2(): Step {
+        return stepBuilderFactory.get("step2")
                 .tasklet { contribution, chunkContext ->
-                    logger.info(">>>>> This is Step2")
-                    logger.info(">>>>> requestDate = $requestDate")
+                    logger.info(">>>>> This is step2")
+                    RepeatStatus.FINISHED
+                }
+                .build()
+    }
+
+    @Bean
+    fun step3(): Step {
+        return stepBuilderFactory.get("step3")
+                .tasklet { contribution, chunkContext ->
+                    logger.info(">>>>> This is step3")
                     RepeatStatus.FINISHED
                 }
                 .build()

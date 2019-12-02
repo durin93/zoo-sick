@@ -1,7 +1,5 @@
 package com.gram.zoosick.domain.stock.entity
 
-import com.gram.zoosick.domain.stock.HigherTheBetterDto
-import com.gram.zoosick.domain.stock.LowerTheBetterDto
 import com.gram.zoosick.support.BaseEntity
 import javax.persistence.*
 
@@ -26,4 +24,9 @@ data class StockInfo(
         @Embedded
         var higherTheBetter: HigherTheBetter //높으면 좋은것
 
-) : BaseEntity()
+) : BaseEntity(){
+        fun testBatchActive(): StockInfo {
+                this.name = "batchActive"
+                return this
+        }
+}
