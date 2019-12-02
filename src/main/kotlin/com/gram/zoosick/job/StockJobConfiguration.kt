@@ -8,6 +8,8 @@ import org.springframework.batch.core.Job
 import org.springframework.batch.core.Step
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory
 import org.springframework.batch.item.*
+import org.springframework.batch.item.database.JpaItemWriter
+import org.springframework.batch.item.database.JpaPagingItemReader
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import java.util.*
@@ -22,10 +24,12 @@ class StockJobConfiguration(
 
     companion object : KLogging()
 
+    val CHUNK_SIZE = 10
+
     @Bean
     fun inactiveStockJob(jobBuilderFactory: JobBuilderFactory, updateStockInfoStep: Step): Job { //(1)
         return jobBuilderFactory.get("inactiveStockJob")
-                .preventRestart() //(2)
+//                .preventRestart() //(2)
                 .start(updateStockInfoStep) //(3)
                 .build()
     }
@@ -33,8 +37,9 @@ class StockJobConfiguration(
     @Bean
     fun updateStockInfoStep(): Step {
         return stepBuilderFactory.get("updateStockInfoStep")
-                .chunk<StockInfo, StockInfo>(10)
-                .reader(inactiveStockInfoReader())
+                .chunk<StockInfo, StockInfo>(CHUNK_SIZE)
+                .reader(inactiveStockInfoJpaReader())
+//                .reader(inactiveStockInfoReader())
                 .processor(inactiveStockProcessor())
                 .writer(inactiveStockWriter())
                 .build()
@@ -52,30 +57,41 @@ class StockJobConfiguration(
     @Bean
     fun inactiveStockProcessor(): ItemProcessor<StockInfo, StockInfo> {
         logger.info { "active processor" }
-        return ItemProcessor { stockInfo ->  stockInfo.testBatchActive() }
+        return ItemProcessor { stockInfo ->
+            stockInfo.updateStatus()
+            stockInfo
+        }
     }
+/*
 
     @Bean
     fun inactiveStockWriter(): ItemWriter<StockInfo> {
         logger.info { "active writer" }
         return ItemWriter { stocksInfo -> stockInfoRepository.saveAll(stocksInfo) }
     }
+*/
 
-   /* @Bean(destroyMethod = "") //(1)
-    @StepScope
-    fun inactiveStockInfoJpaReader(@Value("#{jobParameters[nowDate]}") nowDate: Date): JpaPagingItemReader<StockInfo> {
+    @Bean
+    fun inactiveStockWriter(): JpaItemWriter<StockInfo> {
+        var jpaItemWriter = JpaItemWriter<StockInfo>()
+        jpaItemWriter.setEntityManagerFactory(entityManagerFactory);
+        return jpaItemWriter
+    }
+
+    @Bean(destroyMethod = "") //(1)
+    fun inactiveStockInfoJpaReader(): JpaPagingItemReader<StockInfo> {
         val jpaPagingItemReader = JpaPagingItemReader<StockInfo>()
-        jpaPagingItemReader.setQueryString("select u from StockInfo as u where u.updatedDate < :updatedDate") //(2)
+        jpaPagingItemReader.setQueryString("select s from StockInfo s")
 
-        val map = HashMap<String, Any>()
-        val now = LocalDateTime.ofInstant(nowDate.toInstant(), ZoneId.systemDefault())
-        map["updatedDate"] = now.minusYears(1)
+//        val map = HashMap<String, Any>()
+//        val now = LocalDateTime.ofInstant(nowDate.toInstant(), ZoneId.systemDefault())
+//        map["updatedDate"] = now.minusYears(1)
 
-        jpaPagingItemReader.setParameterValues(map) //(3)
+//        jpaPagingItemReader.setParameterValues(map) //(3)
         jpaPagingItemReader.setEntityManagerFactory(entityManagerFactory) //(4)
-        jpaPagingItemReader.pageSize = 10 //(5)
+        jpaPagingItemReader.pageSize = CHUNK_SIZE //(5)
         return jpaPagingItemReader
-    }*/
+    }
 
     class QueueItemReader<T>(data: List<T>) : ItemReader<T> {
         private val queue: Queue<T>

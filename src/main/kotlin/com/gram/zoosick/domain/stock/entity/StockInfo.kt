@@ -22,11 +22,12 @@ data class StockInfo(
         var lowerTheBetter: LowerTheBetter, //낮으면 좋은것
 
         @Embedded
-        var higherTheBetter: HigherTheBetter //높으면 좋은것
+        var higherTheBetter: HigherTheBetter, //높으면 좋은것
 
-) : BaseEntity(){
-        fun testBatchActive(): StockInfo {
-                this.name = "batchActive"
-                return this
-        }
+        var updatedStatus: Boolean = false
+
+) : BaseEntity() {
+    fun updateStatus() {
+        this.updatedStatus = !this.updatedStatus
+    }
 }
