@@ -2,20 +2,24 @@ package com.gram.zoosick.domain.stock
 
 import com.gram.zoosick.domain.stock.entity.HigherTheBetter
 import com.gram.zoosick.domain.stock.entity.LowerTheBetter
+import com.gram.zoosick.domain.stock.entity.QStockInfo
 import com.gram.zoosick.domain.stock.entity.StockInfo
 import com.gram.zoosick.domain.stock.service.StockService
 import mu.KLogging
+import org.springframework.data.querydsl.binding.QuerydslPredicate
 import org.springframework.util.LinkedMultiValueMap
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 
 
 @RestController
 @RequestMapping("/api/stock")
 class StockApiController(val stockService: StockService) {
     companion object : KLogging()
+
+    @GetMapping("/list")
+    fun getAllStockInfoByCondition(@ModelAttribute searchCorpCondition: SearchCorpCondition): List<StockInfoReturn>? {
+        return stockService.getAllStockInfo(searchCorpCondition)
+    }
 
     @GetMapping("/corps/core")
     fun getAllCorporationsDetail(): List<StockInfoReturn> {
@@ -42,6 +46,7 @@ class StockApiController(val stockService: StockService) {
 }
 
 data class SearchCorpCondition(
+        var name: String? = null,
         var per: String? = null
 )
 

@@ -12,7 +12,7 @@ import org.springframework.context.annotation.Primary
 
 
 @Configuration
-@EnableBatchProcessing
+//@EnableBatchProcessing
 abstract class BaseJob {
     @Autowired
     lateinit var jobBuilderFactory: JobBuilderFactory

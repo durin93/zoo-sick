@@ -6,7 +6,9 @@ plugins {
 	kotlin("jvm") version "1.3.50"
 	kotlin("plugin.spring") version "1.3.50"
 	kotlin("plugin.jpa") version "1.3.50"
+	kotlin("kapt") version "1.3.21"
 }
+
 
 group = "com.gram"
 version = "0.1.g"
@@ -30,7 +32,10 @@ dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-data-jpa")
 	compile("org.jsoup:jsoup:1.10.3")
 	compile("org.springframework.boot:spring-boot-starter-batch")
-//	implementation("org.springframework.boot:spring-boot-starter-freemarker")
+	compile("com.querydsl:querydsl-jpa:4.2.1")
+	kapt("com.querydsl:querydsl-apt:4.2.1:jpa")
+	compile("org.springframework.boot:spring-boot-starter-webflux:2.2.1.RELEASE")
+	//	implementation("org.springframework.boot:spring-boot-starter-freemarker")
 	implementation("org.springframework.boot:spring-boot-starter-web")
 	implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
 	implementation("org.jetbrains.kotlin:kotlin-reflect")
@@ -40,6 +45,11 @@ dependencies {
 		exclude(group = "org.junit.vintage", module = "junit-vintage-engine")
 	}
 }
+
+sourceSets["main"].withConvention(org.jetbrains.kotlin.gradle.plugin.KotlinSourceSet::class) {
+	kotlin.srcDir("$buildDir/generated/source/kapt/main")
+}
+
 
 tasks.withType<Test> {
 	useJUnitPlatform()

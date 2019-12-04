@@ -3,6 +3,8 @@ package com.gram.zoosick.domain.stock.service
 import com.gram.zoosick.domain.stock.*
 import com.gram.zoosick.domain.stock.entity.StockInfo
 import com.gram.zoosick.domain.stock.repository.StockInfoRepository
+import com.gram.zoosick.domain.stock.repository.StockInfoRepositorySupport
+import com.querydsl.core.types.Predicate
 import mu.KLogging
 import org.jsoup.Jsoup
 import org.springframework.beans.factory.annotation.Value
@@ -19,6 +21,7 @@ import javax.transaction.Transactional
 @Transactional
 class StockService(
         val stockInfoRepository: StockInfoRepository,
+        val stockInfoRepositorySupport: StockInfoRepositorySupport,
         val stockApiManager: StockApiManager
 ) {
     @PersistenceContext
@@ -118,6 +121,10 @@ class StockService(
         getAllCorporationsDetail()?.let { it ->
             saveStockInfoList(it)
         }
+    }
+
+    fun getAllStockInfo(searchCorpCondition: SearchCorpCondition): List<StockInfoReturn>? {
+        return stockInfoRepositorySupport.findAllByCondition(searchCorpCondition.name,searchCorpCondition.per)?.map { it.toStockInfoReturn() }
     }
 }
 

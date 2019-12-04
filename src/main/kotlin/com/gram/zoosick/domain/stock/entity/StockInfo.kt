@@ -1,5 +1,6 @@
 package com.gram.zoosick.domain.stock.entity
 
+import com.gram.zoosick.domain.stock.StockInfoReturn
 import com.gram.zoosick.support.BaseEntity
 import javax.persistence.*
 
@@ -30,4 +31,16 @@ data class StockInfo(
     fun updateStatus() {
         this.updatedStatus = !this.updatedStatus
     }
+
+    fun toStockInfoReturn(): StockInfoReturn {
+        return StockInfoReturn(
+                name = name,
+                code = code,
+                currentPrice = currentPrice,
+                sales = sales,
+                lowerTheBetterDto = lowerTheBetter.toLowerTheBetterDto(),
+                higherTheBetterDto = higherTheBetter.toHigherTheBetterDto()
+        )
+    }
+
 }

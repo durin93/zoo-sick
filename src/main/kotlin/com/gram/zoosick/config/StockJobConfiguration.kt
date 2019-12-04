@@ -1,4 +1,4 @@
-package com.gram.zoosick.job
+package com.gram.zoosick.config
 
 import com.gram.zoosick.domain.stock.entity.StockInfo
 import com.gram.zoosick.domain.stock.repository.StockInfoRepository
