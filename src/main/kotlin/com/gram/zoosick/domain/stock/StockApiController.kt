@@ -9,6 +9,7 @@ import mu.KLogging
 import org.springframework.data.querydsl.binding.QuerydslPredicate
 import org.springframework.util.LinkedMultiValueMap
 import org.springframework.web.bind.annotation.*
+import java.io.Serializable
 
 
 @RestController
@@ -17,8 +18,8 @@ class StockApiController(val stockService: StockService) {
     companion object : KLogging()
 
     @GetMapping("/list")
-    fun getAllStockInfoByCondition(@ModelAttribute searchCorpCondition: SearchCorpCondition): List<StockInfoReturn>? {
-        return stockService.getAllStockInfoByCondition(searchCorpCondition)
+    fun findAllStockInfoByConditionCache(@ModelAttribute searchCorpCondition: SearchCorpCondition): List<StockInfoReturn>? {
+        return stockService.findAllStockInfoByConditionCache(searchCorpCondition)
     }
 
     @GetMapping("")
@@ -36,7 +37,12 @@ class StockApiController(val stockService: StockService) {
 data class SearchCorpCondition(
         var name: String? = null,
         var per: String? = null
-)
+){
+
+    fun cacheKey() : String {
+        return "$name$per"
+    }
+}
 
 data class CorpSearchRequest(
         var method: String = "download",
@@ -66,7 +72,7 @@ data class StockInfoReturn(
         var sales: String? = null, //매출
         var lowerTheBetterDto: LowerTheBetterDto?, //낮으면 좋은것
         var higherTheBetterDto: HigherTheBetterDto? //높으면 좋은것
-) {
+): Serializable {
     fun toStockInfo(): StockInfo {
         return StockInfo(
                 name=name,
@@ -83,7 +89,7 @@ data class LowerTheBetterDto(
         var per: String? = null, //10이하면 보통, 6~4정도로 낮으면 좋다. 예외있음 //낮을수록 주식가격 상승 가능성높
         var pbr: String? = null, //낮을수록 자산가치가 저평가 되어있다는 뜻,
         var debtRatio: String? = null //부채비울 (부채/자본 x 100%) 가장최근분기실적으로 가져왓
-) {
+): Serializable {
     fun toLowerTheBetter(): LowerTheBetter {
         return LowerTheBetter(per = per, pbr = pbr, debtRatio = debtRatio)
     }
@@ -94,7 +100,7 @@ data class HigherTheBetterDto(
         var roe: String? = null, // 최소한 정기예금 금리를 넘어야함. 당기순이익을 많이 내 효율적인 영업을 했다는 의미
         var eps: String? = null, // 1주당순이익
         var bps: String? = null // 순자산 / 발행주식
-){
+): Serializable{
     fun toHigherTheBetter(): HigherTheBetter {
         return HigherTheBetter(netIncome = netIncome, roe = roe, eps = eps, bps = bps)
     }

@@ -5,12 +5,16 @@ import com.gram.zoosick.domain.stock.repository.StockInfoRepository
 import com.gram.zoosick.domain.stock.repository.StockInfoRepositorySupport
 import mu.KLogging
 import org.jsoup.Jsoup
+import org.springframework.cache.annotation.Cacheable
 import org.springframework.stereotype.Service
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import java.util.function.Supplier
 import javax.transaction.Transactional
+import org.springframework.cache.annotation.CacheEvict
+
+
 
 @Service
 @Transactional
@@ -48,6 +52,7 @@ class StockService(
             asyncCreateCorpDetail(it)
         }.allOfJoin()
     }
+
 
     private fun saveStockInfoList(stockInfoList: List<StockInfoReturn>) {
         stockInfoList.filterNotNull().map { it.toStockInfo() }.let{ it ->
@@ -106,17 +111,30 @@ class StockService(
         entityManager.clear()
     }*/
 
+    @CacheEvict(value=["findAllStockInfoByConditionCache"], allEntries = true)
     fun updateAllStockInfo() {
         getAllCorporationsDetail()?.let { it ->
             saveStockInfoList(it)
         }
     }
 
-    fun getAllStockInfoByCondition(searchCorpCondition: SearchCorpCondition): List<StockInfoReturn>? {
+    @Cacheable(value = ["findAllStockInfoByConditionCache"], key = "#searchCorpCondition.cacheKey()")
+    fun findAllStockInfoByConditionCache(searchCorpCondition: SearchCorpCondition): List<StockInfoReturn>? {
+        logger.info { "cache test" }
         return stockInfoRepositorySupport.findAllByCondition(searchCorpCondition.name,searchCorpCondition.per)?.map { it.toStockInfoReturn() }
     }
+
 }
 
+// 테스트용
+private fun slowQuery(seconds: Long) {
+    try {
+        Thread.sleep(seconds)
+    } catch (e: InterruptedException) {
+        throw IllegalStateException(e)
+    }
+
+}
 
 fun <T> List<CompletableFuture<out T>>.allOf(): CompletableFuture<List<T>> {
     return CompletableFuture

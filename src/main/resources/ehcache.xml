@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ehcache xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="http://ehcache.org/ehcache.xsd"
+         updateCheck="false">
+    <diskStore path="java.io.tmpdir" />
+
+    <cache name="findAllStockInfoByConditionCache"
+           maxEntriesLocalHeap="10000"
+           maxEntriesLocalDisk="1000"
+           eternal="false"
+           diskSpoolBufferSizeMB="20"
+           timeToIdleSeconds="300" timeToLiveSeconds="600"
+           overflowToDisk = "false"
+           memoryStoreEvictionPolicy="LFU"
+           transactionalMode="off">
+        <persistence strategy="localTempSwap" />
+    </cache>
+
+
+    <!--
+    maxEntriesLocalHeap - 메모리에 생성될 Entry Max 값 (0 = 제한없음)
+    maxEntriesLocalDisk - 디스크(DiskStore)에 저장될 Entry Max값 (0=제한없음)
+    eternal - 영구 Cache 사용 여부 (true 인경우 timeToIdleSeconds, timeToLiveSeconds 설정은 무시된다.)
+    timeToIdleSeconds - 해당 시간 동안 캐쉬가 사용되지 않으면 삭제. (0=삭제되지 않는다)
+    timeToLiveSeconds: 해당 시간이 지나면 캐쉬는 삭제된다. (0=삭제되지 않는다)
+    diskExpiryThreadIntervalSeconds: DiskStore 캐시 정리 작업 실행 간격 (Default=120초)
+    diskSpoolBufferSizeMB: 스풀버퍼에 대한 DiskStore 크기 설정
+    clearOnFlush: flush() 메서드 호출 시점에 메모리(MemoryStore) 삭제 여부. (Default=true)
+    memoryStoreEvictionPolicy : maxEntriesLocalHeap 설정 값에 도달했을때 설정된 정책에 따라객체가 제거되고 새로 추가된다.
+    logging: 로깅 사용 여부를 설정한다.
+    maxEntriesInCache: Terracotta의 분산캐시에만 사용가능하며, 클러스터에 저장 할 수 있는 최대 엔트리 수를 설정한다. 0은 제한이 없다. 캐시가 작동하는 동안에 속성을 수정할 수 있다.
+    overflowToOffHeap: 이 설정은 Ehcache 엔터프라이즈 버전에서 사용할 수 있다. true 로 설정하며 성능을 향상시킬 수 있는 Off-heap 메모리 스토리지를 활용하여 캐시를 사용할 수 있다. Off-heap 메모리 자바의 GC에 영향을 주지않는 다. (Default=false)
+    LRU: 사용이 가장 적었던 것부터 제거한다.
+    FIFO: 먼저 입력된 것부터 제거한다.
+    LFU: 사용량이 적은 것부터 제거한다.
+    -->
+
+</ehcache>

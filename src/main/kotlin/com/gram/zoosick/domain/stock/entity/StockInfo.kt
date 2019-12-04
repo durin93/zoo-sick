@@ -38,8 +38,8 @@ data class StockInfo(
                 code = code,
                 currentPrice = currentPrice,
                 sales = sales,
-                lowerTheBetterDto = lowerTheBetter.toLowerTheBetterDto(),
-                higherTheBetterDto = higherTheBetter.toHigherTheBetterDto()
+                lowerTheBetterDto = lowerTheBetter?.toLowerTheBetterDto(),
+                higherTheBetterDto = higherTheBetter?.toHigherTheBetterDto()
         )
     }
 

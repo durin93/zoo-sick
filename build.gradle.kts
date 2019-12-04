@@ -37,6 +37,13 @@ dependencies {
 	compile("org.springframework.boot:spring-boot-starter-webflux:2.2.1.RELEASE")
 	//	implementation("org.springframework.boot:spring-boot-starter-freemarker")
 
+	compile("org.springframework.boot:spring-boot-starter-cache")
+	compile("net.sf.ehcache:ehcache:2.10.6")
+
+
+//	compile("com.google.code.simple-spring-memcached:simple-spring-memcached:4.1.3")
+//	compile("com.google.code.simple-spring-memcached:xmemcached-provider:4.1.3")
+
 	compile("io.springfox:springfox-swagger2:2.9.2")
 	compile("io.springfox:springfox-swagger-ui:2.9.2")
 

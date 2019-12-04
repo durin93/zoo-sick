@@ -37,18 +37,18 @@ class StockInfoRepositorySupport(
 
     fun findAllByCondition(name: String?, per: String?): List<StockInfo>? {
         return query.selectFrom(stockInfo)
-                .where(eqName(name),eqPer(per))
+                .where(likeName(name),ltPer(per))
                 .fetch()
     }
 
-    private fun eqName(name: String?): BooleanExpression? {
+    private fun likeName(name: String?): BooleanExpression? {
         if(StringUtils.isEmpty(name)){
             return null
         }
-        return stockInfo.name.eq(name)
+        return stockInfo.name.like("%$name%")
     }
 
-    private fun eqPer(per: String?): BooleanExpression? {
+    private fun ltPer(per: String?): BooleanExpression? {
         if(StringUtils.isEmpty(per)){
             return null
         }
