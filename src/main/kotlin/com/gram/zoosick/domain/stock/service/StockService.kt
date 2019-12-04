@@ -1,20 +1,15 @@
 package com.gram.zoosick.domain.stock.service
 
 import com.gram.zoosick.domain.stock.*
-import com.gram.zoosick.domain.stock.entity.StockInfo
 import com.gram.zoosick.domain.stock.repository.StockInfoRepository
 import com.gram.zoosick.domain.stock.repository.StockInfoRepositorySupport
-import com.querydsl.core.types.Predicate
 import mu.KLogging
 import org.jsoup.Jsoup
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import java.util.function.Supplier
-import javax.persistence.EntityManager
-import javax.persistence.PersistenceContext
 import javax.transaction.Transactional
 
 @Service
@@ -24,18 +19,18 @@ class StockService(
         val stockInfoRepositorySupport: StockInfoRepositorySupport,
         val stockApiManager: StockApiManager
 ) {
+    /* for bulkInsert
     @PersistenceContext
     lateinit var entityManager: EntityManager
-
+    @Value("\${spring.jpa.properties.hibernate.jdbc.batch_size:50}")
+    private val batchSize: Int = 0
+    */
 
     companion object : KLogging()
 
-    @Value("\${spring.jpa.properties.hibernate.jdbc.batch_size:50}")
-    private val batchSize: Int = 0
-
     val executors: ExecutorService = Executors.newFixedThreadPool(1000)
 
-    fun getAllCorporationsDetail(): List<StockInfoReturn> {
+    private fun getAllCorporationsDetail(): List<StockInfoReturn> {
         return getAllCorporationsCodes()?.let {
             getDetailCorpDetails(it)
         } ?: emptyList()
@@ -45,6 +40,22 @@ class StockService(
         val response = stockApiManager.getAllCorporations(CorpSearchRequest().toParams())
         val stockCodes: List<String>? = Jsoup.parseBodyFragment(response.toString()).select("td[style*=@]").text().split(" ")
         return stockCodes ?: emptyList()
+    }
+
+    private fun getDetailCorpDetails(stockCodes: List<String>): List<StockInfoReturn> {
+        return stockCodes.map {
+            Thread.sleep(100) //for connection refuse prevent
+            asyncCreateCorpDetail(it)
+        }.allOfJoin()
+    }
+
+    private fun saveStockInfoList(stockInfoList: List<StockInfoReturn>) {
+        stockInfoList.filterNotNull().map { it.toStockInfo() }.let{ it ->
+//        stockInfoList.filterNotNull().distinctBy { it.code }.map { it.toStockInfo() }.let{
+//            stockInfoRepository.deleteAllByIdInQuery(it.map { it.id })
+            stockInfoRepository.deleteAll()
+            stockInfoRepository.saveAll(it)
+        }
     }
 
     fun asyncCreateCorpDetail(code: String): CompletableFuture<StockInfoReturn> {
@@ -81,30 +92,8 @@ class StockService(
         }
     }
 
-    private fun getDetailCorpDetails(stockCodes: List<String>): List<StockInfoReturn> {
-        return stockCodes.map {
-            Thread.sleep(100)
-            asyncCreateCorpDetail(it)
-        }.allOfJoin()
-    }
-
-    fun searchCorpsByCondition(searchCorpCondition: SearchCorpCondition): List<StockInfoReturn>? {
-        val stockCodes = getAllCorporationsCodes()
-        return stockCodes?.let { getDetailCorpDetails(it) }
-    }
-
-    fun saveStockInfoList(stockInfoList: List<StockInfoReturn>) {
-        stockInfoList.filterNotNull().map { it.toStockInfo() }.let{ it ->
-//        stockInfoList.filterNotNull().distinctBy { it.code }.map { it.toStockInfo() }.let{
-//            stockInfoRepository.deleteAllByIdInQuery(it.map { it.id })
-            stockInfoRepository.deleteAll()
-            stockInfoRepository.saveAll(it)
-        }
-    }
-
-
     //안돼~!@!@!@
-    private fun bulkInsert(stockInfoList: List<StockInfo>) {
+    /*private fun bulkInsert(stockInfoList: List<StockInfo>) {
         logger.info { "bulkInsert start $stockInfoList" }
         for ((idx, stockInfo) in stockInfoList.withIndex()) {
             entityManager.persist(stockInfo)
@@ -115,7 +104,7 @@ class StockService(
         }
         entityManager.flush()
         entityManager.clear()
-    }
+    }*/
 
     fun updateAllStockInfo() {
         getAllCorporationsDetail()?.let { it ->
@@ -123,7 +112,7 @@ class StockService(
         }
     }
 
-    fun getAllStockInfo(searchCorpCondition: SearchCorpCondition): List<StockInfoReturn>? {
+    fun getAllStockInfoByCondition(searchCorpCondition: SearchCorpCondition): List<StockInfoReturn>? {
         return stockInfoRepositorySupport.findAllByCondition(searchCorpCondition.name,searchCorpCondition.per)?.map { it.toStockInfoReturn() }
     }
 }

@@ -18,14 +18,7 @@ class StockApiController(val stockService: StockService) {
 
     @GetMapping("/list")
     fun getAllStockInfoByCondition(@ModelAttribute searchCorpCondition: SearchCorpCondition): List<StockInfoReturn>? {
-        return stockService.getAllStockInfo(searchCorpCondition)
-    }
-
-    @GetMapping("/corps/core")
-    fun getAllCorporationsDetail(): List<StockInfoReturn> {
-        val coreInfo = stockService.getAllCorporationsDetail()
-        logger.info { "size ${coreInfo.size}" }
-        return coreInfo
+        return stockService.getAllStockInfoByCondition(searchCorpCondition)
     }
 
     @GetMapping("")
@@ -33,13 +26,8 @@ class StockApiController(val stockService: StockService) {
         return stockService.asyncCreateCorpDetail(code)?.get()
     }
 
-    @GetMapping("/search")
-    fun searchSimilarCorp(@RequestBody searchCorpCondition: SearchCorpCondition): List<StockInfoReturn>? {
-        return stockService.searchCorpsByCondition(searchCorpCondition)
-    }
-
     @GetMapping("/test")
-    fun test(){
+    fun reloadAllStockInfo(){
         stockService.updateAllStockInfo()
     }
 

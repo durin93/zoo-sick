@@ -36,6 +36,11 @@ dependencies {
 	kapt("com.querydsl:querydsl-apt:4.2.1:jpa")
 	compile("org.springframework.boot:spring-boot-starter-webflux:2.2.1.RELEASE")
 	//	implementation("org.springframework.boot:spring-boot-starter-freemarker")
+
+	compile("io.springfox:springfox-swagger2:2.9.2")
+	compile("io.springfox:springfox-swagger-ui:2.9.2")
+
+
 	implementation("org.springframework.boot:spring-boot-starter-web")
 	implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
 	implementation("org.jetbrains.kotlin:kotlin-reflect")
