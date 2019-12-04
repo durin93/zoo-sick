@@ -15,7 +15,6 @@ import org.springframework.data.jpa.repository.config.EnableJpaAuditing
 //@EnableAsync
 @EnableJpaAuditing
 @EnableBatchProcessing
-@EnableCaching
 class ZoosickApplication
 
 fun main(args: Array<String>) {

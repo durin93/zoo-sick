@@ -6,6 +6,7 @@ import com.gram.zoosick.domain.stock.entity.QStockInfo
 import com.gram.zoosick.domain.stock.entity.StockInfo
 import com.gram.zoosick.domain.stock.service.StockService
 import mu.KLogging
+import org.springframework.cache.annotation.EnableCaching
 import org.springframework.data.querydsl.binding.QuerydslPredicate
 import org.springframework.util.LinkedMultiValueMap
 import org.springframework.web.bind.annotation.*
@@ -13,6 +14,7 @@ import java.io.Serializable
 
 
 @RestController
+@EnableCaching
 @RequestMapping("/api/stock")
 class StockApiController(val stockService: StockService) {
     companion object : KLogging()

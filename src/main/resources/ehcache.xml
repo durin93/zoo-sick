@@ -2,18 +2,30 @@
 <ehcache xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:noNamespaceSchemaLocation="http://ehcache.org/ehcache.xsd"
          updateCheck="false">
-    <diskStore path="java.io.tmpdir" />
+    <diskStore path="java.io.tmpdir"/>
+
+    <defaultCache
+            maxEntriesLocalHeap="10000"
+            maxEntriesLocalDisk="10000"
+            eternal="false"
+            diskSpoolBufferSizeMB="20"
+            timeToIdleSeconds="120"
+            timeToLiveSeconds="120"
+            overflowToDisk="false"
+            memoryStoreEvictionPolicy="LFU"
+            transactionalMode="off"
+    ></defaultCache>
 
     <cache name="findAllStockInfoByConditionCache"
            maxEntriesLocalHeap="10000"
-           maxEntriesLocalDisk="1000"
+           maxEntriesLocalDisk="10000"
            eternal="false"
            diskSpoolBufferSizeMB="20"
            timeToIdleSeconds="300" timeToLiveSeconds="600"
-           overflowToDisk = "false"
+           overflowToDisk="false"
            memoryStoreEvictionPolicy="LFU"
            transactionalMode="off">
-        <persistence strategy="localTempSwap" />
+        <persistence strategy="localTempSwap"/>
     </cache>
 
 
