@@ -5,8 +5,9 @@ plugins {
 	id("io.spring.dependency-management") version "1.0.8.RELEASE"
 	kotlin("jvm") version "1.3.50"
 	kotlin("plugin.spring") version "1.3.50"
-	kotlin("plugin.jpa") version "1.3.50"
+	kotlin("plugin.jpa") version "1.3.50" //기본 생성자를 자동 추가.
 	kotlin("kapt") version "1.3.21"
+	id("org.jetbrains.kotlin.plugin.allopen") version "1.3.61"
 }
 
 
